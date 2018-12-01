@@ -1,0 +1,7 @@
+[package]
+name = "multi-grep"
+version = "0.1.0"
+authors = ["Jake Zimmerman <zimmerman.jake@gmail.com>"]
+
+[dependencies]
+regex = "1.1.0"
