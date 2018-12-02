@@ -12,16 +12,23 @@ use std::io::BufReader;
 use std::io::BufRead;
 use std::process;
 
-fn run() -> Result<i32, Error> {
-    let args: Vec<String> = env::args().collect();
-
-    if args.len() != 3 {
-        eprintln!("usage: {} <locs.txt> <pattern>", args[0]);
-        return Ok(1)
+fn parse_lineno(lineno_str: &str, i: usize) -> Result<usize, Error> {
+    match lineno_str.parse::<usize>() {
+        Ok(lineno) => Ok(lineno),
+        Err(_) => {
+            panic!("error: Invalid line number ({}) on line {}", lineno_str, i + 1);
+        }
     }
+}
 
-    let input_filename = &args[1];
-    let pattern = &args[2];
+fn run() -> Result<(), Error> {
+    let args: Vec<String> = env::args().collect();
+    let (input_filename, pattern) = match &args[..] {
+        [_arg0, input_filename, pattern] => (input_filename, pattern),
+        _ => {
+            panic!("usage: {} <locs.txt> <pattern>", args[0]);
+        }
+    };
 
     let re = Regex::new(pattern)?;
 
@@ -30,46 +37,33 @@ fn run() -> Result<i32, Error> {
         let input_line = maybe_input_line?;
 
         let parts: Vec<_> = input_line.split(":").collect();
-        let (filename, lineno) = match parts.len() {
-            2 => {
-                let filename = &parts[0];
-                let lineno_str = &parts[1];
-                match lineno_str.parse::<usize>() {
-                    Ok(lineno) => (filename, lineno),
-                    Err(_) => {
-                        eprintln!("error: Invalid line number ({}) on line {}", lineno_str, i + 1);
-                        return Ok(1)
-                    }
-                }
-            }
+        let (filename, lineno) = match &parts[..] {
+            [filename, lineno_str] => (filename, parse_lineno(lineno_str, i)?),
             _ => {
-                eprintln!("error: Couldn't parse input line {}", i);
-                return Ok(1)
+                panic!("error: Couldn't parse input line {}", i);
             }
         };
 
         let file = File::open(filename)?;
-        for (j, maybe_line) in BufReader::new(file).lines().enumerate() {
+        for (j, line) in BufReader::new(file).lines().enumerate() {
             match j.cmp(&(lineno - 1)) {
                 Less => continue,
                 Greater => break,
-                Equal => (),
-            }
-
-            let line = maybe_line?;
-
-            if re.is_match(&line) {
-                println!("{}:{}", filename, lineno);
+                Equal => {
+                    if re.is_match(&line?) {
+                        println!("{}:{}", filename, lineno);
+                    }
+                }
             }
         }
     }
 
-    Ok(0)
+    Ok(())
 }
 
 fn main() {
     process::exit(match run() {
-        Ok(exit_code) => exit_code,
+        Ok(()) => 0,
         Err(_err) => 1,
     });
 }
