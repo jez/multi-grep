@@ -2,99 +2,109 @@ extern crate regex;
 
 use regex::Regex;
 
+use std::cmp::Ordering::{Less, Equal, Greater};
 use std::env;
-use std::io;
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufRead;
+use std::process;
 
+fn usage(arg0: &str) -> Result<(), i32> {
+    eprintln!("usage: {} <locs.txt> <pattern>", arg0);
+    Err(1)
+}
 
-fn main() -> io::Result<()> {
+fn run() -> Result<(), i32> {
     let args: Vec<String> = env::args().collect();
 
-    let pattern = match args.as_slice() {
-        [] => {
-            println!("usage: multi-grep <pattern>");
-            // TODO(jez) These should be an error exit
-            return Ok(())
-        }
-        [_arg0, arg1] => arg1,
-        _ => {
-            println!("usage: multi-grep <pattern>");
-            return Ok(())
-        }
-    };
+    if args.len() != 3 {
+        return usage(&args[0])
+    }
+
+    let input_filename = &args[1];
+    let pattern = &args[2];
 
     let re = match Regex::new(pattern) {
         Ok(re) => re,
-        Err(error) => panic!("Invalid regex: {}", error),
+        Err(error) => {
+            eprintln!("error: Invalid regex ({})", error);
+            return Err(1)
+        },
     };
 
-    let mut prev_filename: Option<String> = None;
-    let mut next_lineno = 1;
-
-    let mut open_file: Option<BufReader<File>> = None;
-
-    let mut i = 0;
-    loop {
-        i += 1;
-        let mut curr_stdin_line = String::new();
-        if io::stdin().read_line(&mut curr_stdin_line)? == 0 {
-            // TODO(jez) Block until EOF
-            break
+    let input_file = match File::open(input_filename) {
+        Ok(file) => file,
+        Err(err) => {
+            eprintln!("error: Couldn't open input file. Original error:");
+            eprintln!("{}", err);
+            return Err(1)
         }
-        let mut parts = curr_stdin_line.split(":");
-        let curr_filename = match parts.next() {
-            Some(filename) => filename,
-            None => {
-                println!("error: Line {} missing filename part", i);
-                return Ok(())
-            }
-        };
-        let curr_lineno = match parts.next() {
-            Some(lineno) => {
-                lineno.trim().parse::<u32>().unwrap()
-            },
-            None => {
-                println!("error: Line {} missing line number part", i);
-                return Ok(())
+    };
+    for (i, maybe_input_line) in BufReader::new(input_file).lines().enumerate() {
+        let input_line = match maybe_input_line {
+            Ok(input_line) => input_line,
+            Err(err) => {
+                eprintln!("error: Couldn't read input line. Original error:");
+                eprintln!("{}", err);
+                return Err(1)
             }
         };
 
-        let mut curr_file = match open_file {
-            None => {
-                BufReader::new(File::open(curr_filename)?)
-            }
-            Some(f) => {
-                if prev_filename != Some(curr_filename.to_string()) {
-                    next_lineno = 1;
-                    BufReader::new(File::open(curr_filename)?)
-                } else {
-                    f
+        let parts: Vec<_> = input_line.split(":").collect();
+        let (filename, lineno) = match parts.len() {
+            2 => {
+                let filename = &parts[0];
+                let lineno_str = &parts[1];
+                match lineno_str.parse::<usize>() {
+                    Ok(lineno) => (filename, lineno),
+                    Err(_) => {
+                        eprintln!("error: Invalid line number ({}) on line {}", lineno_str, i + 1);
+                        return Err(1)
+                    }
                 }
             }
+            _ => {
+                eprintln!("error: Couldn't parse input line {}", i);
+                return Err(1)
+            }
         };
 
-        loop {
-            let check_this_line = next_lineno == curr_lineno;
-
-            let mut curr_file_line = String::new();
-            if curr_file.read_line(&mut curr_file_line)? == 0 {
-                break
+        let file = match File::open(filename) {
+            Ok(file) => file,
+            Err(err) => {
+                eprintln!("error: Couldn't open {}. Original error:", filename);
+                eprintln!("{}", err);
+                return Err(1)
             }
-            next_lineno += 1;
+        };
+        for (j, maybe_line) in BufReader::new(file).lines().enumerate() {
+            match j.cmp(&(lineno - 1)) {
+                Less => continue,
+                Greater => break,
+                Equal => (),
+            }
 
-            if check_this_line {
-                if re.is_match(&curr_file_line) {
-                    println!("{}:{}", curr_filename, curr_lineno);
+            let line = match maybe_line {
+                Ok(line) => line,
+                Err(err) => {
+                    eprintln!("error: Couldn't read line {} in {}. Original error:", j, filename);
+                    eprintln!("{}", err);
+                    return Err(1)
                 }
-                break
+            };
+
+            if re.is_match(&line) {
+                println!("{}:{}", filename, lineno);
             }
         }
-
-        prev_filename = Some(curr_filename.to_string());
-        open_file = Some(curr_file);
     }
 
     Ok(())
+}
+
+fn main() {
+    process::exit(match run() {
+        Ok(()) => 0,
+        Err(err) => err
+    });
 }
