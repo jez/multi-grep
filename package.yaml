@@ -1,0 +1,27 @@
+name:                multi-grep
+version:             0.1.0.0
+homepage:            https://github.com/jez/multi-grep
+author:              Jake Zimmerman
+maintainer:          zimmerman.jake@gmail.com
+copyright:           2018 Jake Zimmerman
+license:             MIT
+
+# Metadata used when publishing your package
+synopsis:            TODO(jez) Short description of your package
+description:         TODO(jez) Please see the README on Github at <https://github.com/jez/multi-grep#readme>
+category:            Simple
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Wmissing-signatures
+- -Werror
+- -funbox-strict-fields
+
+dependencies:
+- base >=4.7 && <5
+
+executables:
+  multi-grep:
+    main: Main.hs
+    source-dirs: src
