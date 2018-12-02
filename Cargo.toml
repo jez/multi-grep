@@ -5,3 +5,4 @@ authors = ["Jake Zimmerman <zimmerman.jake@gmail.com>"]
 
 [dependencies]
 regex = "1.1.0"
+failure = "0.1.3"
