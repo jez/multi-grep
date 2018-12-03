@@ -52,7 +52,7 @@ struct
 
       val file = TextIO.openIn filename
     in
-      forLine file (fn (j, line) =>
+      (forLine file (fn (j, line) =>
         case Int.compare (j, lineno - 1)
           of LESS => ()
            | GREATER => raise Break
@@ -60,7 +60,7 @@ struct
                case find re line
                  of NONE => ()
                   | SOME _ => println $ filename^":"^lineno_str
-      ) handle Break => ()
+      ) handle Break => ()); TextIO.closeIn file
     end);
     OS.Process.success
   end
