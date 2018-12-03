@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 no_uncommitted() {
   git diff --quiet HEAD 2> /dev/null
@@ -10,8 +11,8 @@ is_clean() {
 }
 
 if is_clean; then
-  STARTED_CLEAN=1
+  export STARTED_CLEAN=1
 else
-  STARTED_CLEAN=
+  export STARTED_CLEAN=
 fi
 
