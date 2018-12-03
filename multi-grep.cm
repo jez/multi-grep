@@ -3,4 +3,4 @@ Group is
   $/regexp-lib.cm
 
   src/main.sig
-  src/main.sml
+  src/main.sml : succ-ml

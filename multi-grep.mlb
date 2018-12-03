@@ -1,7 +1,9 @@
 $(SML_LIB)/basis/basis.mlb
 $(SML_LIB)/smlnj-lib/RegExp/regexp-lib.mlb
 
-src/main.sig
-src/main.sml
+ann "allowSuccessorML true" in
+  src/main.sig
+  src/main.sml
 
-src/call-main.sml
+  src/call-main.sml
+end

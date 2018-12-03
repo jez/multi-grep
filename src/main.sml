@@ -21,65 +21,60 @@ struct
   fun tokenizer c = isColon c orelse Char.isSpace c
   fun find regex str = StringCvt.scanString (RE.find regex) str
 
+  fun usage arg0 =
+    (eprintln $ "usage: "^arg0^" <locs.txt> <pattern>";
+     OS.Process.exit OS.Process.failure)
+
   fun forLine file f =
-    let
-      fun loop i =
-        case TextIO.inputLine file
-          of NONE => ()
-           | SOME line =>
-               (f (i, line);
-                loop (i + 1))
-    in
-      loop 0
-    end
+    case TextIO.inputLine file
+      of NONE => ()
+       | SOME line => (f line; forLine file f)
 
   fun main (arg0, argv) = let
-    val (input_filename, input_pattern) =
+    val (inputFilename, inputPattern) =
       case argv
         of [arg1, arg2] => (arg1, arg2)
-         | _ =>
-             (eprintln $ "usage: "^arg0^" <locs.txt> <pattern>";
-              OS.Process.exit OS.Process.failure)
+         | _ => usage arg0
 
-    val re = RE.compileString input_pattern
+    val re = RE.compileString inputPattern
 
-    val input_file = TextIO.openIn input_filename
+    val inputFile = TextIO.openIn inputFilename
 
-    val prev_filename = ref NONE
-    val next_lineno = ref 1
-    val open_file = ref NONE
-  in
-    forLine input_file (fn (i, input_line) => let
-      val [filename, lineno_str] =  String.tokens tokenizer input_line
-      val SOME lineno = Int.fromString lineno_str
+    val openFilename = ref NONE
+    val openFile = ref NONE
+
+    val currLineno = ref 0
+
+    do forLine inputFile (fn inputLine => let
+      val [filename, linenoStr] = String.tokens tokenizer inputLine
+      val SOME lineno = Int.fromString linenoStr
 
       val file =
-        case !open_file
+        case !openFile
           of NONE => TextIO.openIn filename
            | SOME f =>
-               if !prev_filename <> SOME filename
+               if !openFilename <> SOME filename
                then
-                 (next_lineno := 1;
+                 (currLineno := 0;
                   TextIO.closeIn f;
                   TextIO.openIn filename)
                else
                  f
-      val _ = prev_filename := SOME filename
-      val _ = open_file := SOME file
-    in
-      (forLine file (fn (j, line) => let
-        val check_this_line = !next_lineno = lineno
-        val _ = next_lineno := !next_lineno + 1
-      in
-        if check_this_line
-        then
-           ((case find re line
-              of NONE => ()
-               | SOME _ => println $ filename^":"^lineno_str);
-            raise Break)
-        else ()
-      end)) handle Break => ()
-    end);
+      do openFilename := SOME filename
+      do openFile := SOME file
+
+      do (forLine file (fn line => let
+        do currLineno := !currLineno + 1
+        do if !currLineno = lineno
+           then
+             ((case find re line
+                 of NONE => ()
+                  | SOME _ => println $ filename^":"^linenoStr);
+              raise Break)
+           else ()
+      in () end)) handle Break => ()
+    in () end)
+  in
     OS.Process.success
   end
 end
