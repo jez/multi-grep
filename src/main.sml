@@ -45,22 +45,40 @@ struct
 
     val input_file = TextIO.openIn input_filename
 
+    val prev_filename = ref NONE
+    val next_lineno = ref 1
+    val open_file = ref NONE
   in
     forLine input_file (fn (i, input_line) => let
       val [filename, lineno_str] =  String.tokens tokenizer input_line
       val SOME lineno = Int.fromString lineno_str
 
-      val file = TextIO.openIn filename
+      val file =
+        case !open_file
+          of NONE => TextIO.openIn filename
+           | SOME f =>
+               if !prev_filename <> SOME filename
+               then
+                 (next_lineno := 1;
+                  TextIO.closeIn f;
+                  TextIO.openIn filename)
+               else
+                 f
+      val _ = prev_filename := SOME filename
+      val _ = open_file := SOME file
     in
-      (forLine file (fn (j, line) =>
-        case Int.compare (j, lineno - 1)
-          of LESS => ()
-           | GREATER => raise Break
-           | EQUAL =>
-               case find re line
-                 of NONE => ()
-                  | SOME _ => println $ filename^":"^lineno_str
-      ) handle Break => ()); TextIO.closeIn file
+      (forLine file (fn (j, line) => let
+        val check_this_line = !next_lineno = lineno
+        val _ = next_lineno := !next_lineno + 1
+      in
+        if check_this_line
+        then
+           ((case find re line
+              of NONE => ()
+               | SOME _ => println $ filename^":"^lineno_str);
+            raise Break)
+        else ()
+      end)) handle Break => ()
     end);
     OS.Process.success
   end
