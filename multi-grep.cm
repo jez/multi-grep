@@ -1,6 +1,11 @@
 Group is
-  $/basis.cm
   $/regexp-lib.cm
+  vendor/cmlib/cmlib.cm
+
+  src/prelude.sml
+  src/util.sml
+
+  src/options.sml
 
   src/main.sig
   src/main.sml : succ-ml

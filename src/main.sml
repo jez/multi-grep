@@ -1,79 +1,88 @@
-structure Main : MAIN =
+structure Main (*: MAIN*) =
 struct
-  structure RE = RegExpFn(
-    structure P = AwkSyntax
-    structure E = DfaEngine
-  )
+  local
+    open Prelude
+    infixr 0 $
 
-  fun println str = print (str ^ "\n")
-  fun eprint str =
-    (TextIO.output (TextIO.stdErr, str);
-     TextIO.flushOut TextIO.stdErr)
-  fun eprintln str = eprint (str ^ "\n")
+    open Util
+  in
 
-  infixr 0 $
-  fun f $ x = f x
-
-  exception Break
-
-  fun isColon c = c = #":"
-  fun tokenizer c = isColon c orelse Char.isSpace c
-  fun find regex str = StringCvt.scanString (RE.find regex) str
-
-  fun usage arg0 =
-    (eprintln $ "usage: "^arg0^" <locs.txt> <pattern>";
-     OS.Process.exit OS.Process.failure)
-
-  fun forLine file f =
-    case TextIO.inputLine file
-      of NONE => ()
-       | SOME line => (f line; forLine file f)
+  (* Input lines look like
+   *
+   *   file.txt:20
+   *
+   * and since they're coming from TextIO.inputLine, they're guaranteed to have
+   * a trailing newline.
+   *)
+  fun parseInputLine inputLine =
+    let
+      fun colonOrNewline c = c = #":" orelse c = #"\n" orelse c = #"\r"
+      val [filename, linenoStr] = String.tokens colonOrNewline inputLine
+      val SOME lineno = Int.fromString linenoStr
+    in
+      (filename, lineno)
+    end
+    handle Bind =>
+      (eprintln $ "Couldn't parse input line: "^inputLine;
+       OS.Process.exit OS.Process.failure)
 
   fun main (arg0, argv) = let
-    val (inputFilename, inputPattern) =
-      case argv
-        of [arg1, arg2] => (arg1, arg2)
-         | _ => usage arg0
+    val (inputPattern, input) = Options.parseArgs argv
 
     val re = RE.compileString inputPattern
 
-    val inputFile = TextIO.openIn inputFilename
+    val inputFile =
+      case input
+        of Options.FromStdin => TextIO.stdIn
+         | Options.FromFile inputFilename => TextIO.openIn inputFilename
+    val inputFileStream = streamFromFile inputFile
 
+    (* We keep three pieces of state, to avoid reopening files and rereading
+     * lines that we've already seen. *)
     val openFilename = ref NONE
     val openFile = ref NONE
-
     val currLineno = ref 0
 
-    do forLine inputFile (fn inputLine => let
-      val [filename, linenoStr] = String.tokens tokenizer inputLine
-      val SOME lineno = Int.fromString linenoStr
+    fun processLine inputLine = let
+      val (filename, lineno) = parseInputLine inputLine
 
+      (* We go through great effort to reuse a file that's already open. *)
       val file =
         case !openFile
           of NONE => TextIO.openIn filename
            | SOME f =>
-               if !openFilename <> SOME filename
-               then
+               if !openFilename <> SOME filename then
                  (currLineno := 0;
-                  TextIO.closeIn f;
-                  TextIO.openIn filename)
-               else
+                  switchFile {old = f, new = filename})
+               else if !currLineno < lineno then
                  f
+               else
+                 (* Close and reopen the same file to reset the stream. *)
+                 (eprintln $ "warning: lines for "^filename^" do not strictly increase";
+                  switchFile {old = f, new = filename})
+
+      val fileStream = streamFromFile file
       do openFilename := SOME filename
       do openFile := SOME file
 
-      do (forLine file (fn line => let
+      exception Break
+      fun checkForMatch line = let
         do currLineno := !currLineno + 1
         do if !currLineno = lineno
            then
-             ((case find re line
-                 of NONE => ()
-                  | SOME _ => println $ filename^":"^linenoStr);
+             ((if containsMatch re line
+               then println $ filename^":"^(Int.toString lineno)
+               else ());
               raise Break)
            else ()
-      in () end)) handle Break => ()
-    in () end)
+      in () end
+
+      do Stream.app checkForMatch fileStream handle Break => ()
+    in () end
+
+    do Stream.app processLine inputFileStream
   in
     OS.Process.success
+  end
   end
 end

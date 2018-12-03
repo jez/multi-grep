@@ -1,7 +1,12 @@
-$(SML_LIB)/basis/basis.mlb
 $(SML_LIB)/smlnj-lib/RegExp/regexp-lib.mlb
+vendor/cmlib/cmlib-mlton.mlb
 
 ann "allowSuccessorML true" in
+  src/prelude.sml
+  src/util.sml
+
+  src/options.sml
+
   src/main.sig
   src/main.sml
 
