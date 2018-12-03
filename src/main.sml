@@ -1,9 +1,8 @@
 structure Main : MAIN =
 struct
-  (* TODO(jez) Tweak these? *)
   structure RE = RegExpFn(
     structure P = AwkSyntax
-    structure E = BackTrackEngine
+    structure E = DfaEngine
   )
 
   fun println str = print (str ^ "\n")
