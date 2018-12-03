@@ -17,6 +17,7 @@ ghc-options:
 - -Wmissing-signatures
 - -Werror
 - -funbox-strict-fields
+- -O2
 
 dependencies:
 - base >=4.7 && <5
