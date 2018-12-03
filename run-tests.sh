@@ -48,13 +48,12 @@ for test in "${tests[@]}"; do
   # shellcheck disable=SC2064
   trap "rm -f '$actual'" EXIT
 
-  if [ "$(wc -l "$test")" -lt 2 ]; then
-    error "└─ must have at least two lines in input file (first line is pattern)"
+  pattern="$(head -n 1 "$test")"
+  if [ -z "$pattern" ]; then
+    error "└─ first line of input file must be the pattern to search for."
     failing_tests+=("$test")
     continue
   fi
-
-  pattern="$(head -n 1 "$test")"
 
   if ! tail -n +2 "$test" | "$exe" "$pattern" > "$actual"; then
     error "└─ failed. Output:"
@@ -63,7 +62,7 @@ for test in "${tests[@]}"; do
     continue
   fi
 
-  if ! diff -u "$expected" "$actual"; then
+  if ! git diff "$expected" "$actual"; then
     error "└─ output did not match expected."
     failing_tests+=("$test")
     continue
