@@ -2,11 +2,15 @@ prefix := $(HOME)/.local
 
 .PHONY: default
 default:
-	./symbol make with=mlton
-
-.PHONY: install
-install:
-	./symbol install prefix=$(prefix)
+	@echo "We're using Symbol to build this Standard ML project."
+	@echo "Some available commands:"
+	@echo ""
+	@echo "  ./symbol make"
+	@echo "  ./symbol make with=mlton"
+	@echo "  ./symbol install"
+	@echo ""
+	@echo "You can learn more about Symbol here:"
+	@echo "  https://github.com/jez/symbol"
 
 shell_files := $(shell find . -type f -name '*.sh')
 
