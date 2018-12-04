@@ -17,15 +17,15 @@ script:
   - make test
 
 before_deploy:
-  - symbol install
-  - mv "$HOME/.local/bin/multi-grep" "$HOME/.local/bin/multi-grep-${TRAVIS_TAG}-${TRAVIS_OS_NAME}"
+  - ./symbol install
+  - cd "$HOME/.local/bin" && zip "multi-grep-${TRAVIS_TAG}-${TRAVIS_OS_NAME}.zip" ./multi-grep
 
 # Created with 'travis setup releases'
 deploy:
   provider: releases
   api_key:
     secure: XE4/k4ZHXW/suq/BgNMNNSStu+UF+ySBpXwHnLoQrrpzfn89+guwfge8mqrIEcGT130LWAsC8KDKhNrsKDNwuTe/2szNF+ocYN5DTaZOiF5/EHH87XAZWr6kXKJ0monAgk5F/e6cFk0ey70lGZ4FtB1LTmAZ+d5OpEOG445lK7myd1AYzoaXpsgY9zNOjGCxyyDUSPRtTWQwp1jibk/QEVuvyiU4U8nP0Y5yjRgZkCo8Q81BvsfEsWrZRNR2vbUJxV9GrsDMna4ZVRGtlYVjsh0fBJ7mwb91UUayKMI2xvk73bHSIWL6QpxmXgejsOEm/i36p+ETQdL0gYEfcFmHwBsyMF00La++BWDNDm6eqpBZ9Nca8pBnTCVEbpq6DciWj3dX7eXI3RJ2droEFKR8l55bdHP9w96av35ePhY+9tHb9H6x02skTAXHx5DcNYfTEikSKjZuvZJOM9XjOo6PBLZ3ZAyo5Ut8TlaVgCs8QYCJkUrjgYTsZY1JMkjPtk9scJ9yhrCRhqVK7HNbkpqsE+tN9Ca+txfHcOjNTWea6OXVU1A9eZSr/vhaDiOQ5T2Y327MBiQYyE1WxPyhENDN+nj+awbh+5kZ+JbRs1TxXVPlih8zSROua8JI3iHjdxUDkRWeX8Zcan+m+an8onYlaYSUBHsFK9CRPfbkih7hnkc=
-  file: "$HOME/.local/bin/multi-grep-${TRAVIS_TAG}-${TRAVIS_OS_NAME}"
+  file: "$HOME/.local/bin/multi-grep-${TRAVIS_TAG}-${TRAVIS_OS_NAME}.zip"
   on:
     tags: true
     repo: jez/multi-grep
