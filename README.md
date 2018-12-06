@@ -1,6 +1,6 @@
 # multi-grep
 
-[![Buildmulti-grep Status](https://travis-ci.org/jez/.svg?branch=master)](https://travis-ci.org/jez/multi-grep)
+[![Buildmulti-grep Status](https://travis-ci.org/jez/multi-grep.svg?branch=master)](https://travis-ci.org/jez/multi-grep)
 
 > Search for a pattern on specific lines
 
