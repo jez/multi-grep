@@ -21,15 +21,36 @@ else
   exit 1
 fi
 
+ARGV=()
+UPDATE=
+VERBOSE=
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --update)
+      UPDATE=1
+      shift
+      ;;
+    -v|--verbose)
+      VERBOSE=1
+      shift
+      ;;
+    *)
+      ARGV+=("$1")
+      shift
+      ;;
+  esac
+done
+
 exe=.symbol-work/bin/multi-grep
 
-if [ $# -eq 0 ]; then
+if [ ${#ARGV[@]} -eq 0 ]; then
+  info "Discovering tests..."
   tests=()
   while IFS=$'\n' read -r line; do
     tests+=("$line");
   done < <(find tests -name '*.in')
 else
-  tests=("$@")
+  tests=("${ARGV[@]}")
 fi
 
 failing_tests=()
@@ -48,23 +69,31 @@ for test in "${tests[@]}"; do
   # shellcheck disable=SC2064
   trap "rm -f '$actual'" EXIT
 
-  pattern="$(head -n 1 "$test")"
-  if [ -z "$pattern" ]; then
-    error "└─ first line of input file must be the pattern to search for."
+  argv="$(head -n 1 "$test")"
+  if [ -z "$argv" ]; then
+    error "└─ first line of input file must be the CLI args."
     failing_tests+=("$test")
     continue
   fi
 
   # shellcheck disable=SC2086
-  if ! tail -n +2 "$test" | "$exe" $pattern > "$actual"; then
+  if ! tail -n +2 "$test" | "$exe" $argv > "$actual" 2>&1; then
     error "└─ failed. Output:"
     cat "$actual"
     failing_tests+=("$test")
     continue
+  elif [ -n "$VERBOSE" ]; then
+    cat "$actual"
   fi
 
   if ! git diff "$expected" "$actual"; then
-    error "└─ output did not match expected."
+    if [ -n "$UPDATE" ]; then
+      error "├─ output did not match expected."
+      warn  "└─ Updating $expected"
+      cat "$actual" > "$expected"
+    else
+      error "└─ output did not match expected."
+    fi
     failing_tests+=("$test")
     continue
   fi
@@ -100,7 +129,7 @@ if [ "${#failing_tests[@]}" -ne 0 ]; then
   echo
   echo "There were failing tests. To re-run all failing tests:"
   echo
-  echo "    ./run-tests.sh --verbose ${failing_tests[*]}"
+  echo "    ./run-tests.sh ${failing_tests[*]}"
   echo
 
   exit 1

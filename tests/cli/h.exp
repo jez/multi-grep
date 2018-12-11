@@ -1,0 +1,17 @@
+Usage:
+  .symbol-work/bin/multi-grep [options] <pattern> [<locs.txt>]
+
+Searches in the mentioned lines for the pattern and prints the lines
+that contain a match.
+
+Arguments:
+  <pattern>      An AWK-compatible[1] regular expression.
+  <locs.txt>     The name of a file with lines formatted like:
+                   filename.ext:20
+                 If omitted, reads from stdin.
+
+Options:
+  -v, --invert-match    Print the location if there isn't a match there.
+  --version             Print version and exit.
+
+[1]: http://www.smlnj.org/doc/smlnj-lib/Manual/parser-sig.html
