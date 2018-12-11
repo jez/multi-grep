@@ -27,7 +27,7 @@ struct
        OS.Process.exit OS.Process.failure)
 
   fun main (arg0, argv) = let
-    val (inputPattern, input) = Options.parseArgs argv
+    val {pattern = inputPattern, input, invert} = Options.parseArgs argv
 
     val re = RE.compileString inputPattern
 
@@ -70,10 +70,12 @@ struct
         do currLineno := !currLineno + 1
         do if !currLineno = lineno
            then
-             ((if containsMatch re line
+             (* Using <> to simulate XOR. *)
+             ( if containsMatch re line <> invert
                then println $ filename^":"^(Int.toString lineno)
-               else ());
-              raise Break)
+               else ()
+             ; raise Break
+             )
            else ()
       in () end
 

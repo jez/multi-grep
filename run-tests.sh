@@ -55,7 +55,8 @@ for test in "${tests[@]}"; do
     continue
   fi
 
-  if ! tail -n +2 "$test" | "$exe" "$pattern" > "$actual"; then
+  # shellcheck disable=SC2086
+  if ! tail -n +2 "$test" | "$exe" $pattern > "$actual"; then
     error "└─ failed. Output:"
     cat "$actual"
     failing_tests+=("$test")
