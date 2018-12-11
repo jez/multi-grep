@@ -115,13 +115,9 @@ Install:
   - `-F --fixed-strings` (Don't parse pattern as a regular expression)
   - `-i --ignore-case` (Match case insensitively)
   - `-s --case-sensitive` (Match case sensitively)
-  - `-v --invert-match` (Print lines that don't match pattern)
   - `-w --word-regexp` (Wrap pattern with word boundary pattern)
   - `-q --quiet` (Suppress normal output. Exit 0: match found; Exit 2: no matches)
-- Check that release uploading works
-  - macOS
-  - Linux
-- Homebrew formula
+- Test and build release on Linux
 
 - Can use record to wrap up context, store a ref in each record cell.
 
