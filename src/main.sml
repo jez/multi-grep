@@ -27,7 +27,12 @@ struct
        OS.Process.exit OS.Process.failure)
 
   fun main (arg0, argv) = let
-    val {pattern = inputPattern, input, invert} = Options.parseArgs argv
+    val {pattern = inputPattern, input, invert, caseSensitive} = Options.parseArgs argv
+
+    val inputPattern =
+      if caseSensitive
+      then inputPattern
+      else String.map Char.toLower inputPattern
 
     val re = RE.compileString inputPattern
 
@@ -70,12 +75,19 @@ struct
         do currLineno := !currLineno + 1
         do if !currLineno = lineno
            then
-             (* Using <> to simulate XOR. *)
-             ( if containsMatch re line <> invert
-               then println $ filename^":"^(Int.toString lineno)
-               else ()
-             ; raise Break
-             )
+             let
+               val line' =
+                 if caseSensitive
+                 then line
+                 else String.map Char.toLower line
+             in
+               (* Using <> to simulate XOR. *)
+               ( if containsMatch re line' <> invert
+                 then println $ filename^":"^(Int.toString lineno)
+                 else ()
+               ; raise Break
+               )
+             end
            else ()
       in () end
 

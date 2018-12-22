@@ -37,20 +37,36 @@ struct
     = FromFile of string
     | FromStdin
 
+  type requiredOptions =
+    { pattern: string
+    , input: input
+    }
+
+  type extraOptions =
+    { invert: bool
+    , caseSensitive: bool
+    }
+
   type options =
     { pattern: string
     , input: input
     , invert: bool
+    , caseSensitive: bool
     }
 
-  fun withPattern {pattern = _, input, invert} pattern =
-    {pattern = pattern, input = input, invert = invert}
-  fun withInput {pattern, input = _, invert} input =
-    {pattern = pattern, input = input, invert = invert}
-  fun withInvert {pattern, input, invert = _} invert =
-    {pattern = pattern, input = input, invert = invert}
+  fun withInvert {invert = _, caseSensitive} invert =
+    {invert = invert, caseSensitive = caseSensitive}
+  fun withCaseSensitive {invert, caseSensitive = _} caseSensitive =
+    {invert = invert, caseSensitive = caseSensitive}
 
-  fun parseArgs argv =
+  fun withExtraOptions {pattern, input} {invert, caseSensitive} =
+    { pattern = pattern
+    , input = input
+    , invert = invert
+    , caseSensitive = caseSensitive
+    }
+
+  fun accumulateOptions argv acc =
     case argv
       of "--version"::_ =>
            (println version;
@@ -62,15 +78,22 @@ struct
            (println $ usage ();
             OS.Process.exit OS.Process.success)
        | "-v"::argv' =>
-           withInvert (parseArgs argv') true
+           accumulateOptions argv' (withInvert acc true)
        | "--invert-match"::argv' =>
-           withInvert (parseArgs argv') true
+           accumulateOptions argv' (withInvert acc true)
        | [] => failWithUsage "Missing required <pattern> argument."
        | [pattern] =>
-           {pattern = pattern, input = FromStdin, invert = false}
+           withExtraOptions {pattern = pattern, input = FromStdin} acc
        | [pattern, filename] =>
-           {pattern = pattern, input = FromFile filename, invert = false}
+           withExtraOptions {pattern = pattern, input = FromFile filename} acc
        | arg0::_ => failWithUsage $ "Unrecognized argument: " ^ arg0
+
+  val defaultOptions =
+    { invert = false
+    , caseSensitive = true
+    }
+
+  fun parseArgs argv = accumulateOptions argv defaultOptions
 
   end
 end
