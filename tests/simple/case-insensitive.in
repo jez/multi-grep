@@ -1,0 +1,6 @@
+-i AbCd
+tests/fixtures/sensitivity.txt:1
+tests/fixtures/sensitivity.txt:2
+tests/fixtures/sensitivity.txt:3
+tests/fixtures/sensitivity.txt:4
+tests/fixtures/sensitivity.txt:5

@@ -81,6 +81,14 @@ struct
            accumulateOptions argv' (withInvert acc true)
        | "--invert-match"::argv' =>
            accumulateOptions argv' (withInvert acc true)
+       | "-i"::argv' =>
+           accumulateOptions argv' (withCaseSensitive acc false)
+       | "--ignore-case"::argv' =>
+           accumulateOptions argv' (withCaseSensitive acc false)
+       | "-s"::argv' =>
+           accumulateOptions argv' (withCaseSensitive acc true)
+       | "--case-sensitive"::argv' =>
+           accumulateOptions argv' (withCaseSensitive acc true)
        | [] => failWithUsage "Missing required <pattern> argument."
        | [pattern] =>
            withExtraOptions {pattern = pattern, input = FromStdin} acc
