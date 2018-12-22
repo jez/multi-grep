@@ -110,11 +110,8 @@ Install:
 
 ## TODO
 
-- more tests (for edge cases)
 - grep flags:
   - `-F --fixed-strings` (Don't parse pattern as a regular expression)
-  - `-i --ignore-case` (Match case insensitively)
-  - `-s --case-sensitive` (Match case sensitively)
   - `-w --word-regexp` (Wrap pattern with word boundary pattern)
   - `-q --quiet` (Suppress normal output. Exit 0: match found; Exit 2: no matches)
 - Test and build release on Linux
