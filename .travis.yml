@@ -4,13 +4,12 @@ language: generic
 # TODO(jez) Try to cache some things for faster builds
 # cache:
 
-# TODO(jez) Test on both macOS and Ubuntu
-# matrix:
-
-os: osx
+os:
+  - linux
+  - osx
 
 install:
-  - brew bundle
+  - tests/travis-install.sh
 
 script:
   - make lint
