@@ -1,2 +1,3 @@
 symbol linguist-vendored
 .symbol.mk linguist-vendored
+tests/travis-install.sh linguist-vendored
