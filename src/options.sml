@@ -55,15 +55,15 @@ struct
     }
 
   fun withInvert {invert = _, caseSensitive} invert =
-    {invert = invert, caseSensitive = caseSensitive}
+    {invert, caseSensitive}
   fun withCaseSensitive {invert, caseSensitive = _} caseSensitive =
-    {invert = invert, caseSensitive = caseSensitive}
+    {invert, caseSensitive}
 
   fun withExtraOptions {pattern, input} {invert, caseSensitive} =
-    { pattern = pattern
-    , input = input
-    , invert = invert
-    , caseSensitive = caseSensitive
+    { pattern
+    , input
+    , invert
+    , caseSensitive
     }
 
   fun accumulateOptions argv acc =

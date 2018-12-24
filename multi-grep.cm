@@ -5,7 +5,7 @@ Group is
   src/prelude.sml
   src/util.sml
 
-  src/options.sml
+  src/options.sml : succ-ml
 
   src/main.sig
   src/main.sml : succ-ml
