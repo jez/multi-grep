@@ -114,7 +114,6 @@ Install:
   - `-F --fixed-strings` (Don't parse pattern as a regular expression)
   - `-w --word-regexp` (Wrap pattern with word boundary pattern)
   - `-q --quiet` (Suppress normal output. Exit 0: match found; Exit 2: no matches)
-- Test and build release on Linux
 
 - Can use record to wrap up context, store a ref in each record cell.
 
