@@ -9,7 +9,8 @@ struct
   (* --- regexp utils ------------------------------------------------------ *)
   structure RE = RegExpFn(
     structure P = AwkSyntax
-    structure E = DfaEngine
+    (* DfaEngine currently does not support ^ or $ in regex. *)
+    structure E = BackTrackEngine
   )
 
   fun containsMatch regex str =
