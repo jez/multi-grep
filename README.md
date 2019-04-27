@@ -26,8 +26,6 @@ class C
 end
 ```
 
-[→ View on sorbet.run](#TODO.jez)
-
 Let's say we want to find all method signatures that say `returns(BasicObject)`
 for methods named `initialize`. `grep` won't work, because we can't match across
 multiple lines. Instead, we can:
