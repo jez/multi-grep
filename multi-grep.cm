@@ -2,8 +2,8 @@ Group is
   $/regexp-lib.cm
   vendor/cmlib/cmlib.cm
 
-  src/prelude.sml
-  src/util.sml
+  src/prelude.sml : succ-ml
+  src/util.sml : succ-ml
 
   src/options.sml : succ-ml
 
