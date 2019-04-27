@@ -1,5 +1,3 @@
-prefix := $(HOME)/.local
-
 .PHONY: default
 default:
 	@echo "We're using Symbol to build this Standard ML project."
@@ -19,6 +17,10 @@ lint:
 	shellcheck --version
 	shellcheck $(shell_files)
 
+# There's no way to forward all `make` arguments to run-tests.sh
+# to i.e. run a single test.
+#
+# When you want to do this, invoke `run-tests.sh` directly.
 .PHONY: test
 test:
 	./run-tests.sh
