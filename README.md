@@ -108,6 +108,84 @@ Install:
 ./symbol install prefix="$prefix"
 ```
 
+## Contributing
+
+`multi-grep` is written in Standard ML, and uses [Symbol] to build. To develop
+locally, you'll need both [SML/NJ] and [MLton] installed. If you don't want to
+do this or you can't get one of these installed on your development environment,
+push your changes to a branch on GitHub and CI will automatically run.
+
+### About Symbol
+
+[Symbol] is a build tool for Standard ML. It's designed to work alongside and on
+top of existing SML build tools, like SML/NJ's CM and MLton's MLBasis files.
+
+It works using a shell script and makefile that are checked into this repo, so
+you don't have to install anything yourself (unless you want to initialize a new
+Symbol-powered project).
+
+While not required, for conveninence you might want to add some directories to
+your `PATH` when using `Symbol`:
+
+```bash
+# this is to be able to run executables without a path prefix
+export PATH="$PATH:.symbol-work/bin"
+# this is to be able to run `symbol` instead of `./symbol`
+export PATH="$PATH:."
+# this is where `symbol install` installs executables globally
+export PATH="$PATH:$HOME/.local/bin"
+```
+
+See [the Symbol README][Symbol] for more information.
+
+### Quickref
+
+The most common commands you're likely to use:
+
+```bash
+# Build for development (fast recompilation, but slow execution)
+./symbol make
+
+# Build for release (slow recompilation, but fast execution):
+./symbol make with=mlton
+
+# Run after building:
+.symbol-work/bin/multi-grep
+
+# Check code style:
+make lint
+
+# Run the tests:
+./run-tests.sh
+
+# Run the tests, and update all snapshots:
+./run-tests.sh --update
+```
+
+### Writing tests
+
+Tests live in the `tests/` folder. The nesting structure of subfolders is not
+significant. Tests are written as CLI snapshot tests. Each test consists of a
+pair of files:
+
+- `$my_test_name.in`: the input to the test
+
+  The first line of this file is the CLI arguments to be passed.
+  The remaining lines are fed to `multi-grep` on stdin.
+
+- `$my_test_name.exp`: the expected output of the test
+
+  The test harness will capture all actual output on stdout and stderr when
+  comparing against the `.exp` file.
+
+To write a new test, create both of the above files. Alternatively, create only
+the `.in` file, and run `./run-tests.sh --update` on your newly created file.
+
+Feel free to create files in `tests/fixtures/` containing sample content to
+search through within the individual tests. Also feel free to share fixtures
+across tests.
+
+
 ## TODO
 
 - grep flags:
@@ -121,3 +199,7 @@ Install:
 
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://jez.io/MIT-LICENSE.txt)
 
+
+[Symbol]: https://github.com/jez/symbol
+[SML/NJ]: https://www.smlnj.org
+[MLton]: http://mlton.org
