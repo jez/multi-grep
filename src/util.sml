@@ -14,9 +14,7 @@ struct
   )
 
   fun containsMatch regex str =
-    case StringCvt.scanString (RE.find regex) str
-      of SOME _ => true
-       | NONE => false
+    Option.isSome (StringCvt.scanString (RE.find regex) str)
 
   (* --- textio utils ------------------------------------------------------ *)
   fun switchFile {old = file, new = filename} =

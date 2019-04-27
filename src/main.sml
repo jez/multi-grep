@@ -76,13 +76,21 @@ struct
         do if !currLineno = lineno
            then
              let
-               val line' =
+               val line =
                  if caseSensitive
                  then line
                  else String.map Char.toLower line
+
+               (* Remove the newline character at the line end, so that '$'
+                * effectively matches the end of a line.
+                * (Awk syntax dictates that it matches the end of a *string*.)
+                * Since we're using TextIO.inputLine to stream the lines,
+                * each line is guaranteed to have a newline. *)
+               val lineLength = String.size line
+               val line = String.substring (line, 0, lineLength - 1)
              in
                (* Using <> to simulate XOR. *)
-               ( if containsMatch re line' <> invert
+               ( if containsMatch re line <> invert
                  then println $ filename^":"^(Int.toString lineno)
                  else ()
                ; raise Break
