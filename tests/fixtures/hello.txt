@@ -3,3 +3,6 @@ goodbye
 hello from line three
 hello, world!
 goodbye, world D:
+this line ends with hello
+this line ends with goodbye
+this line also ends with goodbye
