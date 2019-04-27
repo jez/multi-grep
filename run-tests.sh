@@ -60,9 +60,15 @@ for test in "${tests[@]}"; do
 
   expected="$(dirname "$test")/$(basename "$test" .in).exp"
   if ! [ -f "$expected" ]; then
-    error "└─ missing .exp file ($expected)"
-    failing_tests+=("$test")
-    continue
+    if [ -n "$UPDATE" ]; then
+      error "├─ missing .exp file ($expected)"
+      warn  "├─ Creating $expected (empty)"
+      touch "$expected"
+    else
+      error "└─ missing .exp file ($expected)"
+      failing_tests+=("$test")
+      continue
+    fi
   fi
 
   actual="$(mktemp)"
