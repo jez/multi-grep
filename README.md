@@ -6,55 +6,40 @@
 
 By default, `grep` searches for a given pattern on **all** lines in a file.
 Sometimes that is too coarse grained. By contrast, `multi-grep` searches for a
-pattern only on the specified lines. Here's a short example:
+pattern only on the specified lines.
 
-```ruby
-# -- foo.rb --
-class A
-  sig {returns(BasicObject)}
-  def initialize; end
-end
+`multi-grep` takes input that looks like
 
-class B
-  sig {returns(BasicObject)}
-  def another_method; end
-end
-
-class C
-  sig {void}
-  def void_method; end
-end
+```
+filename.txt:17
+filename.txt:42
+another.md:12
+another.md:23
 ```
 
-Let's say we want to find all method signatures that say `returns(BasicObject)`
-for methods named `initialize`. `grep` won't work, because we can't match across
-multiple lines. Instead, we can:
+And searches for a regular expression only on the file + line combinatines
+specified in the input. When a match is found, the `filename:line` combination that was
+being searched is printed. In this way, `multi-grep` is a Unix-style pipeline
+filter.
 
-```shell
-# print all lines matching returns.BasicObject:
-❯ grep -nH returns.BasicObject foo.rb
-foo.rb:3:  sig {returns(BasicObject)}
-foo.rb:8:  sig {returns(BasicObject)}
-
-# use AWK to print just the locations, and add +1 to the line number:
-❯ ... | awk 'BEGIN { FS = ":"} {print $1 ":" ($2 + 1)}'
-foo.rb:4
-foo.rb:9
-
-# use multi-grep to search for initialize:
-❯ ... | ... | multi-grep initialize
-foo.rb:4
-
-# use AWK to subtract 1 to get the original line numbers:
-❯ ... | ... | ... | awk 'BEGIN { FS = ":"} {print $1 ":" ($2 - 1)}'
-foo.rb:3
-```
-
-So basically, if `grep` is like a chainsaw, `multi-grep` is more like a scalpel.
-Using a combination of `grep`, `awk`, and `multi-grep`, we can list specifically
-the file locations corresponding to method signatures for methods named
+If `grep` is like a chainsaw, `multi-grep` is more like a scalpel. Using a
+combination of `grep`, `awk`, and `multi-grep`, we can list specifically the
+file locations corresponding to method signatures for methods named
 `initialize`.
 
+Two other tools that are useful in conjunction with `multi-grep`:
+
+- [`diff-locs`] is a tool that converts a unified diff into input suitable for
+  `multi-grep`.
+
+- [`multi-sed`] is like multi-grep, but with sed. It's (currently) slower
+  because it's implemented in Bash (`multi-grep` is fast because it's
+  implemented in Standard ML and profiled to only do work that's needed).
+
+[`diff-locs`]: https://github.com/jez/diff-locs
+[`multi-sed`]: https://github.com/jez/bin/tree/master/multi-sed
+
+<!-- TODO(jez) Implement multi-sed in OCaml -->
 
 ## Install
 
@@ -192,6 +177,52 @@ across tests.
   - `-q --quiet` (Suppress normal output. Exit 0: match found; Exit 2: no matches)
 
 - Can use record to wrap up context, store a ref in each record cell.
+
+## Another example
+
+Here's another short example. Given a Ruby file like this:
+
+```ruby
+# -- foo.rb --
+class A
+  sig {returns(BasicObject)}
+  def initialize; end
+end
+
+class B
+  sig {returns(BasicObject)}
+  def another_method; end
+end
+
+class C
+  sig {void}
+  def void_method; end
+end
+```
+
+We want to find all method signatures that say `returns(BasicObject)` for
+methods named `initialize`. Naive `grep` won't work, because we can't match
+across multiple lines. Instead, we can:
+
+```shell
+# print all lines matching returns.BasicObject:
+❯ grep -nH returns.BasicObject foo.rb
+foo.rb:3:  sig {returns(BasicObject)}
+foo.rb:8:  sig {returns(BasicObject)}
+
+# use AWK to print just the locations, and add +1 to the line number:
+❯ ... | awk 'BEGIN { FS = ":"} {print $1 ":" ($2 + 1)}'
+foo.rb:4
+foo.rb:9
+
+# use multi-grep to search for initialize:
+❯ ... | ... | multi-grep initialize
+foo.rb:4
+
+# use AWK to subtract 1 to get the original line numbers:
+❯ ... | ... | ... | awk 'BEGIN { FS = ":"} {print $1 ":" ($2 - 1)}'
+foo.rb:3
+```
 
 ## License
 
