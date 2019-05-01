@@ -71,25 +71,24 @@ struct
       do openFile := SOME file
 
       exception Break
-      fun checkForMatch line = let
-        do currLineno := !currLineno + 1
-        do if !currLineno = lineno
-           then
-             let
-               val line' =
-                 if caseSensitive
-                 then line
-                 else String.map Char.toLower line
-             in
-               (* Using <> to simulate XOR. *)
-               ( if containsMatch re line' <> invert
-                 then println $ filename^":"^(Int.toString lineno)
-                 else ()
-               ; raise Break
-               )
-             end
-           else ()
-      in () end
+      fun checkForMatch line =
+        ( currLineno := !currLineno + 1
+        ; if !currLineno = lineno then
+            let
+              val line' =
+                if caseSensitive
+                then line
+                else String.map Char.toLower line
+            in
+              (* Using <> to simulate XOR. *)
+              ( if containsMatch re line' <> invert
+                then println $ filename^":"^(Int.toString lineno)
+                else ()
+              ; raise Break
+              )
+            end
+          else ()
+        )
 
       do Stream.app checkForMatch fileStream handle Break => ()
     in () end
