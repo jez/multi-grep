@@ -38,8 +38,14 @@ struct
 
     val inputFile =
       case input
-        of Options.FromStdin => TextIO.stdIn
-         | Options.FromFile inputFilename => TextIO.openIn inputFilename
+        of Options.FromStdin =>
+             ( if Posix.ProcEnv.isatty Posix.FileSys.stdin
+               then eprintln "Warning: reading from stdin, which is a tty."
+               else ()
+             ; TextIO.stdIn
+             )
+         | Options.FromFile inputFilename =>
+             TextIO.openIn inputFilename
     val inputFileStream = streamFromFile inputFile
 
     (* We keep three pieces of state, to avoid reopening files and rereading
