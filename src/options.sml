@@ -5,7 +5,7 @@ struct
     infixr 0 $
   in
 
-  val version = "0.2.0"
+  val version = "0.2.2"
 
   fun usage () = String.concatWith "\n"
     [ "Usage:"
