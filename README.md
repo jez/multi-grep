@@ -169,6 +169,15 @@ search through within the individual tests. Also feel free to share fixtures
 across tests.
 
 
+### Bumping the version
+
+- Update the version in `options.sml`
+- Update the failing tests (`run-tests.sh --update`)
+- Commit the changes, and create a new git tag with that version
+- Make a new release on GitHub (`hub release`)
+- Update the Homebrew formula
+
+
 ## TODO
 
 - grep flags:
