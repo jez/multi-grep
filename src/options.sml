@@ -21,6 +21,8 @@ struct
     , "                 If omitted, reads from stdin."
     , ""
     , "Options:"
+    , "  -i, --ignore-case     Treat the pattern as case insensitive."
+    , "  -s, --case-sensitive  Treat the pattern as case sensitive [default]."
     , "  -v, --invert-match    Print the location if there isn't a match there."
     , "  --version             Print version and exit."
     , ""
