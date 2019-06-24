@@ -17,29 +17,57 @@ another.md:12
 another.md:23
 ```
 
-And searches for a regular expression only on the file + line combinatines
-specified in the input. When a match is found, the `filename:line` combination that was
-being searched is printed. In this way, `multi-grep` is a Unix-style pipeline
-filter.
+and searches for a regular expression only on the file + line combinatines
+specified in the input. When a match is found, the `filename:line` combination
+that was being searched is printed. In this way, `multi-grep` is a Unix-style
+pipeline filter.
 
 If `grep` is like a chainsaw, `multi-grep` is more like a scalpel. Using a
-combination of `grep`, `awk`, and `multi-grep`, we can list specifically the
-file locations corresponding to method signatures for methods named
-`initialize`.
+combination of tools like `git grep -l` and `awk` with `multi-grep`, we can
+construct precise filters. Specifically, two other tools are particularly useful
+in conjunction with `multi-grep`:
 
-Two other tools that are useful in conjunction with `multi-grep`:
-
-- [`diff-locs`] is a tool that converts a unified diff into input suitable for
+- [diff-locs] is a tool that converts a unified diff into input suitable for
   `multi-grep`.
 
-- [`multi-sed`] is like multi-grep, but with sed. It's (currently) slower
-  because it's implemented in Bash (`multi-grep` is fast because it's
-  implemented in Standard ML and profiled to only do work that's needed).
+- [multi-sub] is like `multi-grep`, but with `sed -e 's/.../.../`.
 
-[`diff-locs`]: https://github.com/jez/diff-locs
-[`multi-sed`]: https://github.com/jez/bin/tree/master/multi-sed
+`multi-grep` is fast. It's implemented in Standard ML, compiled with the [MLton]
+optimizing compiler, and has been repeatedly profiled to improve performance. It
+only does work that's absolutely needed.
 
-<!-- TODO(jez) Implement multi-sed in OCaml -->
+[diff-locs]: https://github.com/jez/diff-locs
+[multi-sub]: https://github.com/jez/multi-sub
+
+
+## Usage
+
+This is the help for `multi-grep` version `0.2.2`. It might be out of date—run
+`multi-grep --help` locally for up-to-date help.
+
+```
+❯ multi-grep --help
+Usage:
+  multi-grep [options] <pattern> [<locs.txt>]
+
+Searches in the mentioned lines for the pattern and prints the lines
+that contain a match.
+
+Arguments:
+  <pattern>      An AWK-compatible[1] regular expression.
+  <locs.txt>     The name of a file with lines formatted like:
+                   filename.ext:20
+                 If omitted, reads from stdin.
+
+Options:
+  -i, --ignore-case     Treat the pattern as case insensitive.
+  -s, --case-sensitive  Treat the pattern as case sensitive [default].
+  -v, --invert-match    Print the location if there isn't a match there.
+  --version             Print version and exit.
+
+[1]: http://www.smlnj.org/doc/smlnj-lib/Manual/parser-sig.html
+```
+
 
 ## Install
 
