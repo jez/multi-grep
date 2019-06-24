@@ -30,7 +30,7 @@ in conjunction with `multi-grep`:
 - [diff-locs] is a tool that converts a unified diff into input suitable for
   `multi-grep`.
 
-- [multi-sub] is like `multi-grep`, but with `sed -e 's/.../.../`.
+- [multi-sub] is like `multi-grep`, but with `sed -e 's/.../.../'`.
 
 `multi-grep` is fast. It's implemented in Standard ML, compiled with the [MLton]
 optimizing compiler, and has been repeatedly profiled to improve performance. It
